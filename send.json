@@ -1,0 +1,31 @@
+{
+  "type": "auth/StdTx",
+  "value": {
+    "msg": [
+      {
+        "type": "cosmos-sdk/MsgSend",
+        "value": {
+          "from_address": "cosmos1***",
+          "to_address": "cosmos1***",
+          "amount": [
+            {
+              "denom": "uatom",
+              "amount": "1"
+            }
+          ]
+        }
+      }
+    ],
+    "fee": {
+      "amount": [
+        {
+          "denom": "uatom",
+          "amount": "1"
+        }
+      ],
+      "gas": "35000"
+    },
+    "signatures": null,
+    "memo": ""
+  }
+}
