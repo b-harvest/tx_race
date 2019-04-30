@@ -1,11 +1,11 @@
 {
   "sync_check": false,
   "gaiacli_path": "gaiacli",
-  "chain_id": "gaia-13003",
+  "chain_id": null,
   "from_address": "cosmos1ul3ef4trvjfmgaptu70ed4fjlky2aa49vna6uy",
   "account_number": 0,
   "account_sequence": 0,
-  "denom": "muon",
+  "denom": null,
   "balance": 0,
   "amount": 1,
   "key_name": null,
