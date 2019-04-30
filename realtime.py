@@ -8,7 +8,7 @@ import os
 from gaiacli import get_settings
 
 # config = get_settings(path='settings.json')
-config = get_settings(path='settings_test.json')
+config = get_settings(path='settings_target.json')
 
 for p in [config.target_tx_path, config.target_signed_tx_path]:
     if not os.path.exists(p):
