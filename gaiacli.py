@@ -62,6 +62,7 @@ class Config(object):
     last_height = None
     last_time = None
     catching_up = None
+    nodes = None
 
     def __init__(self, **kwargs):
         print("over riding base")

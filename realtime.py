@@ -38,21 +38,25 @@ while True:
     )
     # for b in ['block']:
     for i in range(0, 5):
-        for b in ['async', 'sync', 'block']:
-            cmd_last = cmd[:]
-            memo = 'race_tx_realtime_{}_{}_{}'.format(b, config.account_sequence, datetime.datetime.now())
-            if i != 0:
-                memo += ' sequence delta {}'.format(i)
-                cmd_last += ' --sequence {}'.format(int(config.account_sequence)+i)
+        for n in config.nodes:
+            for b in ['async', 'sync', 'block']:
+                cmd_last = cmd[:]
+                memo = 'race_tx_realtime_{}_{}_{}'.format(b, config.account_sequence, datetime.datetime.now())
+                if i != 0:
+                    memo += ' sequence delta {}'.format(i)
+                    cmd_last += ' --sequence {}'.format(int(config.account_sequence)+i)
 
-            cmd_last += " --memo '{}' -b {}".format(memo, b)
+                cmd_last += " --memo '{}' -b {}".format(memo, b)
 
-            if b == 'block':
-                cmd_last += ' &'
-            print('\t', cmd_last)
-            subprocess.call(cmd_last, shell=True)
-            time.sleep(0.01)
-            # subprocess.call(cmd_last, shell=True)
-            # subprocess.call(cmd_last, shell=True)
+                if 'localhost' not in n:
+                    cmd_last += " --node '{}' ".format(n)
 
-        time.sleep(0.5)
+                if b == 'block':
+                    cmd_last += ' &'
+                print('\t', cmd_last)
+                subprocess.call(cmd_last, shell=True)
+                time.sleep(0.01)
+                # subprocess.call(cmd_last, shell=True)
+                # subprocess.call(cmd_last, shell=True)
+
+        time.sleep(0.1)
