@@ -65,7 +65,6 @@ class Config(object):
     nodes = None
 
     def __init__(self, **kwargs):
-        print("over riding base")
         [self.__setattr__(attr, kwargs[attr]) for attr in dir(self) if not attr.startswith('_') and attr in kwargs]
         # object.__init__(**kwargs)
 
@@ -119,7 +118,7 @@ def get_settings(path='settings.json'):
         last_height = status['sync_info']['latest_block_height']
         last_time = status['sync_info']['latest_block_time']
 
-        print(config.chain_id, last_height, last_time)
+    config.update_status()
 
     # sync check
     if config.sync_check and status['sync_info']['catching_up']:
@@ -129,7 +128,7 @@ def get_settings(path='settings.json'):
     if not config.chain_id:
         config.chain_id = status['node_info']['network']
 
-
+    print(config.chain_id, last_height, last_time)
 
     if not config.from_address :
         config.from_address = input('input from_address: ')
