@@ -44,4 +44,6 @@ for sequence in range(int(config.account_sequence), int(config.account_sequence)
     if not config.debug:
         subprocess.run(cmd_string, shell=True)
     print(str(sequence) + ' complete!')
-    config.start_gas_price -= 0.1
+
+    if config.start_gas_price > config.gas_price:
+        config.start_gas_price -= 0.1
