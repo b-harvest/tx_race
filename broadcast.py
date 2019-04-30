@@ -44,7 +44,7 @@ while True:
     # )
     # for b in ['block']:
     for i in range(0, 3):
-        cmd = 'gaiacli tx broadcast {}/send_{}.json'.format(config.target_signed_tx_path, config.account_sequence+i)
+        cmd = 'gaiacli tx broadcast {}/send_{}.json'.format(config.target_signed_tx_path, int(config.account_sequence)+i)
 
         for n in config.nodes:
             for b in ['async', 'sync', 'block']:
