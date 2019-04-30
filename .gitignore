@@ -1,2 +1,4 @@
 # Created by .ignore support plugin (hsz.mobi)
 .idea/*
+signed_tx_path/*
+tx_path/*

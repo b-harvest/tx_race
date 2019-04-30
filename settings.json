@@ -1,0 +1,21 @@
+{
+  "sync_check": true,
+  "gaiacli_path": "gaiacli",
+  "chain_id": null,
+  "from_address": "cosmos10e4vsut6suau8tk9m6dnrm0slgd6npe3hjqndl",
+  "account_number": null,
+  "account_sequence": null,
+  "denom": null,
+  "balance": null,
+  "amount": 1000000,
+  "key_name": null,
+  "to_address": "",
+  "fee_amount": 1,
+  "gas": 40000,
+  "gas_price": 1.5,
+  "passphrase": "",
+  "number_of_tx": 100,
+  "target_tx_path": "tx_path",
+  "target_signed_tx_path": "signed_tx_path",
+  "debug": false
+}

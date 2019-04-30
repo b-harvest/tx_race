@@ -1,0 +1,21 @@
+{
+  "sync_check": false,
+  "gaiacli_path": "gaiacli",
+  "chain_id": "gaia-13003",
+  "from_address": "cosmos1ul3ef4trvjfmgaptu70ed4fjlky2aa49vna6uy",
+  "account_number": 0,
+  "account_sequence": 0,
+  "denom": "muon",
+  "balance": 0,
+  "amount": 1,
+  "key_name": null,
+  "to_address": "cosmos1mzpr07ehk5jrxk6ptcguwpz6af33fk82asxx52",
+  "fee_amount": 60000,
+  "gas": 40000,
+  "gas_price": 1.5,
+  "passphrase": "",
+  "number_of_tx": 100,
+  "target_tx_path": "tx_path",
+  "target_signed_tx_path": "signed_tx_path",
+  "debug": false
+}
