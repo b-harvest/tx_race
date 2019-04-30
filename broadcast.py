@@ -2,91 +2,61 @@
 # require >= Python 3.5.2
 import subprocess
 import json
+import time
 import datetime
 import os
-# from gaiacli import Gaiacli
+from gaiacli import get_settings
 
-#
-# # account check
-# gaiacli_path = input("input gaiacli_path (default: 'gaiacli' ex: '/home/ubuntu/go/bin/gaiacl /home/ubuntu/.gaiacli')") or 'gaiacli'
-#
-#
-# # gaiacli = Gaiacli(gaiacli_path)
-# # status = gaiacli.get_status()
-#
-# # sync check
-# if status['sync_info']['catching_up']:
-#     print('not synced')
-#     exit()
-#
-# chain_id = status['node_info']['network']
-# last_height = status['sync_info']['latest_block_height']
-# last_time = status['sync_info']['latest_block_time']
-#
-# print(chain_id, last_height, last_time)
-#
-# from_address = input("input from_address: ") or 'cosmos10e4vsut6suau8tk9m6dnrm0slgd6npe3hjqndl'
-#
-# account = gaiacli.query_account(from_address)
-#
-# account_number = int(account['value']['account_number'])
-# account_sequence = int(account['value']['sequence'])
-#
-# print(from_address, account_number, account_sequence)
-#
-# if len(account['value']['coins']) == 1:
-#     denom = account['value']['coins'][0]['denom']
-#     balance = int(account['value']['coins'][0]['amount'])
-# else:
-#     denom = input("input denom (default uatom) : ") or 'uatom'
-#
-# amount = int(input("input amount: "))
-# while balance-amount < 10000000:
-#     amount = int(input("amount is too big, re-input amount: "))
-#
-# key_name = None
-# keys = gaiacli.keys_list()
-# for k in keys:
-#     if k['address'] == from_address:
-#         key_name = k['name']
-#         break
-#
-# if not key_name:
-#     print('key not exist')
-#     exit()
-#
-# print(key_name, balance, denom)
-#
-# to_address = input("input to_address: ")
-# while not to_address or not to_address.startswith('cosmos1'):
-#     to_address = input("re-input to_address: ")
-#
-# fee_amount = input("input fee_amount (default 1) : ") or 1
-# gas = input("input gas (default 35000) : ") or 35000
-# passphrase = input("input passphrase: ")
-# while not passphrase or len(passphrase) < 8:
-#     passphrase = input("re-input passphrase: ")
-#
-# number_of_tx = int(input("input number_of_tx (default 100) : ") or 100)
-#
-# target_tx_path = input("input target_tx_path (default: signed_tx_path) : ") or "signed_tx_path"
-# target_signed_tx_path = input("input target_tx_path (default: target_signed_tx_path) : ") or "signed_tx_path"
-#
-# for p in [target_tx_path, target_signed_tx_path]:
-#     if not os.path.exists(p):
-#         exit()
+# config = get_settings(path='settings.json')
+config = get_settings(path='settings_test.json')
 
-# with open("send.json","r") as f:
-#     send_json=json.loads(f.read())
-#
-# for sequence in range(account_sequence,account_sequence+number_of_tx):
-#     send_json["value"]["msg"][0]["value"]["amount"][0]["amount"] = str(int(amount))
-#     send_json["value"]["memo"] = "race_tx_{}_{}".format(sequence, datetime.datetime.now(), )
-#     tx_path = "{}/send_{}.json".format(target_tx_path, sequence)
-#     signed_tx_path = "{}/send_{}.json".format(target_signed_tx_path, sequence)
-#     with open(tx_path,"w+") as f:
-#         f.write(json.dumps(send_json))
-#
-#     cmd_string = "echo {} | sudo gaiacli tx sign {} --from {} --sequence {} --account-number {} --chain-id {} --yes --offline > {}".format(passphrase, tx_path, key_name, sequence, account_number, chain_id, signed_tx_path)
-#     subprocess.run(cmd_string, shell=True)
-#     print(str(sequence) + " complete!")
+for p in [config.target_tx_path, config.target_signed_tx_path]:
+    if not os.path.exists(p):
+        os.makedirs(p, exist_ok=True)
+
+with open('send.json','r') as f:
+    send_json=json.loads(f.read())
+
+# a = "echo '123123123' | gaiacli tx send cosmos1ul3ef4trvjfmgaptu70ed4fjlky2aa49vna6uy 100000000000000000000muon --from cosmos1ul3ef4trvjfmgaptu70ed4fjlky2aa49vna6uy --chain-id gaia-13003 --gas 40000 --gas-prices 1.5muon --memo 'auto' --yes -b block"
+while True:
+    config.update_status()
+    config.update_account()
+    print("---------------------------------------------")
+    print("block : {}, catching_up: {}, balance : {}, sequence : {}".format(config.last_height, config.catching_up, config.balance, config.account_sequence))
+    print("---------------------------------------------")
+
+    # target_amount = config.amount
+    remain_for_fee = 5000000
+    if config.balance < remain_for_fee:
+        time.sleep(3)
+        continue
+
+    target_amount = config.balance - remain_for_fee
+
+    cmd = "echo '{}' | gaiacli tx send {} {}{} --from {} -a {} --chain-id {} --gas {} --gas-prices {}{} --yes".format(
+        config.passphrase, config.to_address, target_amount, config.denom, config.from_address, config.account_number, config.chain_id, config.gas, config.gas_price, config.denom
+    )
+    # for b in ['block']:
+    for i in range(0, 5):
+        for n in config.nodes:
+            for b in ['async', 'sync', 'block']:
+                cmd_last = cmd[:]
+                memo = 'race_tx_realtime_{}_{}_{}'.format(b, config.account_sequence, datetime.datetime.now())
+                if i != 0:
+                    memo += ' sequence delta {}'.format(i)
+                    cmd_last += ' --sequence {}'.format(int(config.account_sequence)+i)
+
+                cmd_last += " --memo '{}' -b {}".format(memo, b)
+
+                if 'localhost' not in n:
+                    cmd_last += " --node '{}' ".format(n)
+
+                if b == 'block':
+                    cmd_last += ' &'
+                print('\t', cmd_last)
+                subprocess.call(cmd_last, shell=True)
+                time.sleep(0.05)
+                # subprocess.call(cmd_last, shell=True)
+                # subprocess.call(cmd_last, shell=True)
+            time.sleep(0.05)
+        time.sleep(0.1)
