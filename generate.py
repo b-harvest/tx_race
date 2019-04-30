@@ -20,10 +20,10 @@ with open('send.json','r') as f:
 for sequence in range(int(config.account_sequence), int(config.account_sequence) + int(config.number_of_tx)):
 
     config.start_gas_price = float(config.start_gas_price)
-    total_gas = str(int(config.gas) * float(config.start_gas_price))
+    total_gas = str(int(int(config.gas) * float(config.start_gas_price)))
 
-    if int(config.gas) > float(total_gas):
-        total_gas = str(config.gas)
+    if int(config.gas) > int(total_gas):
+        total_gas = str(int(config.gas))
 
     send_json['value']['msg'][0]['value']['amount'][0]['amount'] = str(int(config.amount))
     send_json['value']['msg'][0]['value']['amount'][0]['denom'] = config.denom
