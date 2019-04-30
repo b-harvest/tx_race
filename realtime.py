@@ -51,7 +51,7 @@ while True:
                 cmd_last += ' &'
             print('\t', cmd_last)
             subprocess.call(cmd_last, shell=True)
-            time.sleep(0.05)
+            time.sleep(0.1)
             # subprocess.call(cmd_last, shell=True)
             # subprocess.call(cmd_last, shell=True)
-        time.sleep(0.1)
+        time.sleep(0.2)
