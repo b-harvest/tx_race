@@ -19,7 +19,7 @@
   "target_signed_tx_path": "signed_tx_path",
   "debug": false,
   "nodes": [
-    "tcp://118.31.0.119 26657",
+    "tcp://118.31.0.119:26657",
     "tcp://localhost:26657"
   ]
 }
