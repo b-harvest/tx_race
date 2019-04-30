@@ -53,6 +53,7 @@ class Config(object):
     to_address = None
     fee_amount = None
     gas = None
+    start_gas_price = None
     gas_price = None
     passphrase = None
     number_of_tx = None

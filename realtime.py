@@ -28,7 +28,7 @@ while True:
     # target_amount = config.amount
     remain_for_fee = 5000000
     if config.balance < remain_for_fee:
-        time.sleep(3)
+        time.sleep(0.5)
         continue
 
     target_amount = config.balance - remain_for_fee
