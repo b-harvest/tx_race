@@ -1,25 +1,24 @@
 {
   "sync_check": true,
-  "gaiacli_path": "gaiacli",
-  "chain_id": null,
-  "from_address": "cosmos10e4vsut6suau8tk9m6dnrm0slgd6npe3hjqndl",
-  "account_number": 0,
-  "account_sequence": 0,
-  "denom": null,
+  "gaiad_path": "gaiad",
+  "chain_id": "testing",
+  "from_address": "cosmos1uev59w4h4m405k2hm5ttffgqwcmer8tp6lgx9c",
+  "account_number": null,
+  "account_sequence": null,
+  "denom": "stake",
   "balance": null,
-  "amount": 1000000,
-  "key_name": null,
-  "to_address": "",
-  "fee_amount": 40000,
-  "gas": 40000,
+  "amount": 100000000,
+  "key_name": "test",
+  "to_address": "cosmos1q0ghuupzczq43yjvz7ke9wgsccfhv8vt93laha",
+  "fee_amount": 100000,
+  "gas": 100000,
   "start_gas_price": 3.0,
   "gas_price": 3.0,
-  "passphrase": "",
-  "number_of_tx": 500,
+  "number_of_tx": 100,
   "target_tx_path": "tx_path",
   "target_signed_tx_path": "signed_tx_path",
   "debug": false,
   "nodes": [
-      "tcp://localhost:26657"
+    "tcp://localhost:26657"
   ]
 }

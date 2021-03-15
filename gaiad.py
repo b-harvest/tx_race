@@ -3,31 +3,14 @@ import json
 
 
 def get_json(query):
-    try:
-        res = subprocess.check_output(query, shell=True)
-        res_json = json.loads(res.decode('utf-8'))
-        return res_json
-    except:
-        print(query)
-        return {}
+    res = subprocess.run(
+        query, shell=True, capture_output=True)
+    output = res.stdout
+    if output == b'':
+        output = res.stderr
+    res_json = json.loads(output.decode('utf-8'))
+    return res_json
 
-
-# class Gaiacli(object):
-#     def __init__(self, gaiacli_path='gaiacli'):
-#         self.gaiacli_path = gaiacli_path
-#
-#     def get_status(self):
-#         query = '{} {}'.format(self.gaiacli_path, 'status')
-#         return get_json(query)
-#
-#     def query_account(self, address):
-#         query = '{} query account {} --trust-node --output json --indent'.format(self.gaiacli_path, address)
-#         return get_json(query)
-#
-#     def keys_list(self):
-#         query = '{} keys list --output json --indent'.format(self.gaiacli_path)
-#         return get_json(query)
-#
 
 def find_dic(dic, target):
     for k, v in dic.items():
@@ -41,7 +24,7 @@ def find_dic(dic, target):
 
 class Config(object):
     sync_check = None
-    gaiacli_path = None
+    gaiad_path = None
     chain_id = None
     from_address = None
     account_number = None
@@ -55,7 +38,6 @@ class Config(object):
     gas = None
     start_gas_price = None
     gas_price = None
-    passphrase = None
     number_of_tx = None
     target_tx_path = None
     target_signed_tx_path = None
@@ -75,15 +57,20 @@ class Config(object):
         return obj
 
     def get_status(self):
-        query = '{} {}'.format(self.gaiacli_path, 'status')
+        query = '{} {}'.format(self.gaiad_path, 'status')
+        return get_json(query)
+
+    def get_balances(self, address):
+        query = '{} query bank balances {} --output json'.format(
+            self.gaiad_path, address)
         return get_json(query)
 
     def query_account(self, address):
-        query = '{} query account {} --trust-node --output json --indent'.format(self.gaiacli_path, address)
+        query = '{} query account {} --output json'.format(self.gaiad_path, address)
         return get_json(query)
 
     def keys_list(self):
-        query = '{} keys list --output json --indent'.format(self.gaiacli_path)
+        query = '{} keys list --output json'.format(self.gaiad_path)
         return get_json(query)
 
     def update_account(self):
@@ -91,43 +78,44 @@ class Config(object):
         self.account_number = find_dic(account, 'account_number')
         self.account_sequence = find_dic(account, 'sequence')
         # self.balance = find_dic(account, 'sequence')
-        coins = find_dic(account, 'coins')
-        if coins and len(coins) == 1:
-            self.balance = int(coins[0]['amount'])
-            if coins[0]['denom'] != self.denom:
-                print(coins, 'denom not matched')
+        balances = self.get_balances(self.from_address)
+        coins = find_dic(balances, 'balances')
+        if coins:
+            for coin in coins:
+                if coin['denom'] == self.denom:
+                    self.balance = int(coin['amount'])
 
     def update_status(self):
         status = self.get_status()
-        self.last_height = status['sync_info']['latest_block_height']
-        self.last_time = status['sync_info']['latest_block_height']
-        self.catching_up = status['sync_info']['catching_up']
+        self.last_height = status['SyncInfo']['latest_block_height']
+        self.last_time = status['SyncInfo']['latest_block_time']
+        self.catching_up = status['SyncInfo']['catching_up']
 
 
 def get_settings(path='settings.json'):
     with open(path) as fp:
         config = Config(**json.load(fp))
 
-    if not config.gaiacli_path:
-        config.gaiacli_path = input(
-            "input gaiacli_path (default: 'gaiacli' ex: '/home/ubuntu/go/bin/gaiacl /home/ubuntu/.gaiacli')") or 'gaiacli'
+    if not config.gaiad_path:
+        config.gaiad_path = input(
+            "input gaiad_path (default: 'gaiad' ex: '/home/ubuntu/go/bin/gaiad /home/ubuntu/.gaiad')") or 'gaiad'
 
-    # gaiacli = Gaiacli(config.gaiacli_path)
+    # gaiacli = Gaiacli(config.gaiad_path)
 
     status = config.get_status()
     if status:
-        last_height = status['sync_info']['latest_block_height']
-        last_time = status['sync_info']['latest_block_time']
+        last_height = status['SyncInfo']['latest_block_height']
+        last_time = status['SyncInfo']['latest_block_time']
 
     config.update_status()
 
     # sync check
-    if config.sync_check and status['sync_info']['catching_up']:
+    if config.sync_check and status['SyncInfo']['catching_up']:
         print('not synced')
         exit()
 
     if not config.chain_id:
-        config.chain_id = status['node_info']['network']
+        config.chain_id = status['NodeInfo']['network']
 
     print(config.chain_id, last_height, last_time)
 
@@ -144,14 +132,14 @@ def get_settings(path='settings.json'):
             # account_number = int(account['value']['account_number'])
 
         if not config.account_number:
-            config.account_number = input('input account_number : ')
+            config.account_number = int(input('input account_number : '))
 
     if not config.account_sequence:
         if account:
             config.account_sequence = find_dic(account, 'sequence')
 
         if not config.account_sequence:
-            config.account_sequence = input('input account_sequence : ')
+            config.account_sequence = int(input('input account_sequence : '))
 
     print(config.from_address, config.account_number, config.account_sequence)
     config.update_account()
@@ -159,10 +147,11 @@ def get_settings(path='settings.json'):
 
     if not config.denom:
         if account:
-            coins = find_dic(account, 'coins')
-            if coins and len(coins) == 1:
-                config.denom = coins[0]['denom']
-                config.balance = int(coins[0]['amount'])
+            coins = find_dic(account, 'balances')
+            if coins:
+                for coin in coins:
+                    if coin['denom'] == config.denom:
+                        config.balance = int(coin['amount'])
             else:
                 print(coins)
         else:
@@ -170,13 +159,15 @@ def get_settings(path='settings.json'):
 
     if not config.balance:
         if account:
-            coins = find_dic(account, 'coins')
-            if coins and len(coins) == 1:
-                config.balance = int(coins[0]['amount'])
+            coins = find_dic(account, 'balances')
+            if coins:
+                for coin in coins:
+                    if coin['denom'] == config.denom:
+                        config.balance = int(coin['amount'])
             else:
                 print(coins)
         else:
-            config.balance = input('input test balance : ')
+            config.balance = int(input('input test balance : '))
 
 
     if not config.amount:
@@ -207,14 +198,10 @@ def get_settings(path='settings.json'):
             config.to_address = input('re-input to_address: ')
 
     if not config.fee_amount:
-        config.fee_amount = input('input fee_amount (default 1) : ') or 1
+        config.fee_amount = int(input('input fee_amount (default 1) : ')) or 1
     if not config.gas:
-        config.gas = input('input gas (default 35000) : ') or 35000
-    if not config.passphrase:
-        config.passphrase = input('input passphrase: ')
-        while not config.passphrase or len(config.passphrase) < 8:
-            config.passphrase = input('re-input passphrase: ')
-
+        config.gas = intput(input('input gas (default 35000) : ')) or 35000
+    
     if not config.gas_price:
         config.gas_price = float(input('input gas_price: default 1.5') or 1.5)
 
