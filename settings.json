@@ -1,5 +1,6 @@
 {
   "sync_check": true,
+  "passphrase": "",
   "gaiad_path": "gaiad",
   "chain_id": "testing",
   "from_address": "cosmos1uev59w4h4m405k2hm5ttffgqwcmer8tp6lgx9c",

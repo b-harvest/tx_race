@@ -38,6 +38,7 @@ class Config(object):
     gas = None
     start_gas_price = None
     gas_price = None
+    passphrase = None
     number_of_tx = None
     target_tx_path = None
     target_signed_tx_path = None
@@ -201,6 +202,10 @@ def get_settings(path='settings.json'):
         config.fee_amount = int(input('input fee_amount (default 1) : ')) or 1
     if not config.gas:
         config.gas = intput(input('input gas (default 35000) : ')) or 35000
+    if not config.passphrase:
+        config.passphrase = input('input passphrase: ')
+        while not config.passphrase or len(config.passphrase) < 8:
+            config.passphrase = input('re-input passphrase over length 8: ')
     
     if not config.gas_price:
         config.gas_price = float(input('input gas_price: default 1.5') or 1.5)
